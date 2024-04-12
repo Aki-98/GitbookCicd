@@ -1,0 +1,5 @@
+*.log
+
+common/__pycache__
+Douban/chrome
+Gitbook/__pycache__

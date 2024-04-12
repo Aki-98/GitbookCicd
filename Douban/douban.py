@@ -1,0 +1,1 @@
+URL_SEARCH_ALBUM = "https://www.douban.com/search?cat=1003&q=%s"
