@@ -28,3 +28,4 @@ def workflow_txt_to_md(file_path: str):
 
 if __name__ == "__main__":
     workflow_txt_to_md(".")
+    input("任意键退出")

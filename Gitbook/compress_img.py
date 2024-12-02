@@ -18,7 +18,10 @@ def workflow_compress_imgs(file_path: str):
         file_size_mb_before = mio.get_file_size_mb(jpg_file)
         global_logger.debug(f"jpg file: {jpg_file}")
         global_logger.debug(f"file size before {file_size_mb_before:.2f} MB")
-        if file_size_mb_before > 1:
+        if file_size_mb_before < 0.1:
+            global_logger.debug(f"file with a small size skip for compressing")
+            continue
+        elif file_size_mb_before > 1:
             mpic.compress_jpg(jpg_file, jpg_file, quality=30)
         else:
             mpic.compress_jpg(jpg_file, jpg_file, quality=95)
@@ -28,10 +31,15 @@ def workflow_compress_imgs(file_path: str):
         file_size_mb_before = mio.get_file_size_mb(png_file)
         global_logger.debug(f"png file: {png_file}")
         global_logger.debug(f"file size before {file_size_mb_before:.2f} MB")
-        mpic.compress_png(png_file, png_file)
+        if file_size_mb_before < 0.1:
+            global_logger.debug(f"file with a small size skip for compressing")
+            continue
+        else:
+            mpic.compress_png(png_file, png_file)
         file_size_mb_after = mio.get_file_size_mb(png_file)
         global_logger.debug(f"file size after {file_size_mb_after:.2f} MB")
 
 
 if __name__ == "__main__":
     workflow_compress_imgs(".")
+    input("任意键退出")
