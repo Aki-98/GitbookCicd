@@ -9,6 +9,7 @@ import mstr
 import mlogger
 
 IMG_FORMAT = r"!\[.*?\]\((.*?)\)"
+ROOT_DIR = mio.get_basename(mlogger.get_cwd())
 
 
 def __find_image_references_in_md(md_data):
@@ -21,9 +22,6 @@ def __is_drive_on_path(file_path: str) -> bool:
         return True
 
 
-ROOT_DIR = mio.get_basename(mlogger.get_cwd())
-
-
 def __is_root_on_path(file_path: str) -> bool:
     if ROOT_DIR in file_path:
         return True
@@ -32,15 +30,6 @@ def __is_root_on_path(file_path: str) -> bool:
 def __is_weblink_on_name(file_name: str) -> bool:
     if mstr.extract_web_link_list(file_name):
         return True
-
-
-def __get_relative_path(path, dir):
-    parts = path.split(dir, 1)
-    if len(parts) > 1:
-        splited_path = parts[1].lstrip(os.path.sep)
-        return splited_path
-    else:
-        return None
 
 
 def __reformat_img(
