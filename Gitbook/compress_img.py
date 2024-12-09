@@ -1,5 +1,6 @@
 import mio
 import mpic
+import minput
 from mlogger import global_logger
 
 
@@ -18,26 +19,25 @@ def workflow_compress_imgs(file_path: str):
         file_size_mb_before = mio.get_file_size_mb(jpg_file)
         global_logger.debug(f"jpg file: {jpg_file}")
         global_logger.debug(f"file size before {file_size_mb_before:.2f} MB")
-        if file_size_mb_before < 0.1:
-            global_logger.debug(f"file with a small size skip for compressing")
-            continue
-        elif file_size_mb_before > 1:
+        if file_size_mb_before > 1:
             mpic.compress_jpg(jpg_file, jpg_file, quality=30)
+            file_size_mb_after = mio.get_file_size_mb(jpg_file)
+            global_logger.debug(f"file size after {file_size_mb_after:.2f} MB")
+            minput.exit_or_continue()
         else:
-            mpic.compress_jpg(jpg_file, jpg_file, quality=95)
-        file_size_mb_after = mio.get_file_size_mb(jpg_file)
-        global_logger.debug(f"file size after {file_size_mb_after:.2f} MB")
+            global_logger.debug(f"file with a small size skip for compressing")
+
     for png_file in png_file_list:
         file_size_mb_before = mio.get_file_size_mb(png_file)
         global_logger.debug(f"png file: {png_file}")
         global_logger.debug(f"file size before {file_size_mb_before:.2f} MB")
-        if file_size_mb_before < 0.1:
-            global_logger.debug(f"file with a small size skip for compressing")
-            continue
-        else:
+        if file_size_mb_before > 0.5:
             mpic.compress_png(png_file, png_file)
-        file_size_mb_after = mio.get_file_size_mb(png_file)
-        global_logger.debug(f"file size after {file_size_mb_after:.2f} MB")
+            file_size_mb_after = mio.get_file_size_mb(png_file)
+            global_logger.debug(f"file size after {file_size_mb_after:.2f} MB")
+            minput.exit_or_continue()
+        else:
+            global_logger.debug(f"file with a small size skip for compressing")
 
 
 if __name__ == "__main__":
