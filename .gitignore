@@ -1,5 +1,6 @@
+/.vscode
+
 *.log
 
-common/__pycache__
-Douban/chrome
-Gitbook/__pycache__
+common/__pycache__/
+python_utils/__pycache__/
