@@ -1,22 +1,11 @@
-此程序可以直接替代git提交，将变动直接提交到Gitbook网页上
+完成一次完整的Gitbook CICD
 
-对于Ubuntu，请先安装wine，再运行exe程序
-```shell
-sudo apt install wine
-```
 
-运行此程序，应将目录以以下层级放置
-- CSBlogGitbook
-  - _book
-- CSGitbook
-  - _book
-- KnowGitbook
-  - _book
-- Gitbook
-  - know
-  - cs
-  - csblog
-- KnowGitbook
-  - Gitbook
-    - gitbook_cicd.py
-- Python-Automation
+
+- 配置仓库的push--webhook---> server端入口
+- server端接收到http post, 执行python utils
+- python utils
+  - 压缩图片
+  - 为让Gitbook网页展示图片，格式化md文件中的图片引用
+- gitbook build 生成网页？
+- 更新网页到gitbook仓库？
