@@ -59,11 +59,10 @@ def __reformat_img(
     )
     mio.write_data_to_file(file_all_path=md_file_path_all, data=md_data)
     minput.exit_or_continue()
-    __reformat_imgs_in_md(md_file_path_all)
     return True
 
 
-def __reformat_imgs_in_md(md_file_path_all):
+def __reformat_imgs_in_md(md_file_path_all, rename: bool):
     global_logger.debug(f">>> found md file: {md_file_path_all}")
     md_file_name = mio.get_filename_from_pathall(md_file_path_all)
     md_folder_abs = mio.get_filepath_from_pathall(md_file_path_all)
@@ -98,6 +97,7 @@ def __reformat_imgs_in_md(md_file_path_all):
                 md_file_path_all,
                 md_data,
             )
+            __reformat_imgs_in_md(md_file_path_all, rename)
             break
 
         elif __is_drive_on_path(img_folder_rel) or __is_root_on_path(img_folder_rel):
@@ -118,6 +118,7 @@ def __reformat_imgs_in_md(md_file_path_all):
                     md_file_path_all,
                     md_data,
                 )
+                __reformat_imgs_in_md(md_file_path_all, rename)
                 break
             else:
                 # 再找下md同级目录或其子目录下
@@ -128,7 +129,9 @@ def __reformat_imgs_in_md(md_file_path_all):
                     global_logger.debug(
                         f"1-2. 在md文件夹内已找到文件, 将开始复制与删除"
                     )
-                    img_folder_abs = mio.get_filepath_from_pathall(found_img_list[0])
+                    img_folder_abs = mio.resolve_relative_path(
+                        mio.get_filepath_from_pathall(found_img_list[0])
+                    )
                     __reformat_img(
                         img_ref,
                         img_folder_abs,
@@ -139,6 +142,7 @@ def __reformat_imgs_in_md(md_file_path_all):
                         md_file_path_all,
                         md_data,
                     )
+                    __reformat_imgs_in_md(md_file_path_all, rename)
                     break
                 else:
                     global_logger.error(f"未找到图片!")
@@ -153,7 +157,9 @@ def __reformat_imgs_in_md(md_file_path_all):
             )
             if found_img_list and len(found_img_list) == 1:
                 global_logger.debug(f"3-1. 从img_refs已找到文件, 将开始复制与删除")
-                img_folder_abs = mio.get_filepath_from_pathall(found_img_list[0])
+                img_folder_abs = mio.resolve_relative_path(
+                    mio.get_filepath_from_pathall(found_img_list[0])
+                )
                 __reformat_img(
                     img_ref,
                     img_folder_abs,
@@ -164,6 +170,7 @@ def __reformat_imgs_in_md(md_file_path_all):
                     md_file_path_all,
                     md_data,
                 )
+                __reformat_imgs_in_md(md_file_path_all, rename)
                 break
             else:
                 # 再找下md同级目录或其子目录下
@@ -174,7 +181,9 @@ def __reformat_imgs_in_md(md_file_path_all):
                     global_logger.debug(
                         f"3-2. 在md文件夹内已找到文件, 将开始复制与删除"
                     )
-                    img_folder_abs = mio.get_filepath_from_pathall(found_img_list[0])
+                    img_folder_abs = mio.resolve_relative_path(
+                        mio.get_filepath_from_pathall(found_img_list[0])
+                    )
                     __reformat_img(
                         img_ref,
                         img_folder_abs,
@@ -185,11 +194,12 @@ def __reformat_imgs_in_md(md_file_path_all):
                         md_file_path_all,
                         md_data,
                     )
+                    __reformat_imgs_in_md(md_file_path_all, rename)
                     break
                 else:
                     global_logger.error(f"未找到图片!")
 
-        elif not mstr.is_valid_alphanumeric(img_file_name):
+        elif not mstr.is_valid_alphanumeric(img_file_name) and rename:
             global_logger.warning(
                 f"4. 图片名称不是11位字母和数字的组合, img_file_name: {img_file_name}"
             )
@@ -209,12 +219,13 @@ def __reformat_imgs_in_md(md_file_path_all):
                     md_file_path_all,
                     md_data,
                 )
+                __reformat_imgs_in_md(md_file_path_all, rename)
                 break
             else:
                 global_logger.error(f"未找到图片!")
 
 
-def workflow_reformat_imgs_in_md(file_path):
+def workflow_reformat_imgs_in_md(file_path, rename=True):
     global_logger.debug(
         "-----------------------workflow_reformat_imgs_in_md-----------------------"
     )
@@ -223,7 +234,7 @@ def workflow_reformat_imgs_in_md(file_path):
     for md_file_path_all in md_file_list:
         md_file_base_name = mio.get_basename(md_file_path_all)
         if md_file_base_name not in ["README.md", "SUMMARY.md"]:
-            __reformat_imgs_in_md(md_file_path_all)
+            __reformat_imgs_in_md(md_file_path_all, rename)
 
 
 if __name__ == "__main__":
