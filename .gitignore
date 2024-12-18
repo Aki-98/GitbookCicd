@@ -1,6 +1,6 @@
 /.vscode
+common/__pycache__/
+/__pycache__/
 
 *.log
 
-common/__pycache__/
-python_utils/__pycache__/

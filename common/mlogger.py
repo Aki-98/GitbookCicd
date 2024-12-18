@@ -7,10 +7,6 @@ from colorama import init, Fore, Style
 
 from mtime import get_current_timestamp, convert_to_time
 
-PATH_REMOTE = "//43.82.125.244/ChinaUX/"
-PATH_REMOTE_LOGGER = PATH_REMOTE + ".auto/log/"
-PATH_REMOTE_DATA = PATH_REMOTE + ".auto/data/"
-
 
 class ErrorInLogger(Exception):
     def __init__(self, message):
@@ -31,31 +27,6 @@ class GlobalLogger(logging.Logger):
         print(Fore.LIGHTRED_EX + str(msg) + Style.RESET_ALL)
 
 
-def get_cwd():
-    return os.getcwd()
-
-
-def get_user():
-    return os.getlogin()
-
-
-def get_log_folder():
-    return f"{PATH_REMOTE_LOGGER}/{os.path.basename(sys.argv[0])}/{get_user()}/"
-
-
-def get_logger_file_path_all():
-    current_timestamp = get_current_timestamp()
-    return f"{get_log_folder()+convert_to_time(current_timestamp)}.log"
-
-
-def get_json_file_path(folder: str, date: str):
-    return f"{PATH_REMOTE_DATA}/jira_sync/{date}/{folder}"
-
-
-def get_json_file_path_all(folder: str, date: str, file_name: str):
-    return f"{get_json_file_path(folder,date)}/{file_name}.json"
-
-
 def setup_logger():
     # init colorama
     init()
@@ -64,9 +35,8 @@ def setup_logger():
     formatter = logging.Formatter(
         "%(asctime)s - %(funcName)s - %(levelname)s - %(message)s"
     )
-    logger_file_path_all = get_logger_file_path_all()
-    if not os.path.exists(os.path.dirname(logger_file_path_all)):
-        os.makedirs(os.path.dirname(logger_file_path_all))
+    current_timestamp = get_current_timestamp()
+    logger_file_path_all = f"{convert_to_time(current_timestamp)}.log"
     file_handler = logging.FileHandler(logger_file_path_all, encoding=ENCODE)
     file_handler.setLevel(logging.DEBUG)
     console_handler = logging.StreamHandler()

@@ -1,7 +1,7 @@
-import mio
-import mpic
-import minput
-from mlogger import global_logger
+from common import mio
+from common import mpic
+from common import minput
+from common.mlogger import global_logger
 
 
 def workflow_compress_imgs(file_path: str):

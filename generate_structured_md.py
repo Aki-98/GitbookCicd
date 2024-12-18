@@ -1,6 +1,6 @@
-from mlogger import global_logger
+from common.mlogger import global_logger
 import os
-import mio
+from common import mio
 
 FILE_README = "README.md"
 FILE_SUMMARY = "SUMMARY.md"
