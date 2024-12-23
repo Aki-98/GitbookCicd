@@ -1,5 +1,3 @@
-from mlogger import global_logger
-
 import requests
 
 import mio

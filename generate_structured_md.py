@@ -1,6 +1,8 @@
-from common.mlogger import global_logger
+from logging import Logger
 import os
+
 from common import mio
+from common import mlogger
 
 FILE_README = "README.md"
 FILE_SUMMARY = "SUMMARY.md"
@@ -8,6 +10,8 @@ FILE_EXTENSION_MD = ".md"
 FILE_EXTENSION_TXT = ".txt"
 FILE_EXTENSION_JSON = ".json"
 INDENT = "  "
+
+py_logger: Logger = None
 
 
 def __split_path_after_keyword(path, keyword):
@@ -27,13 +31,13 @@ def __create_empty_readme(folder_path):
         with open(readme_path, "w", encoding="utf-8") as f:
             f.write("# " + os.path.basename(folder_path).capitalize() + "\n\n")
 
-    global_logger.debug(f"空的README.md已成功创建在 {folder_path}")
+    py_logger.debug(f"空的README.md已成功创建在 {folder_path}")
 
 
 def __txt_to_md(file_path: str):
     txt_file_list = mio.find_files(file_path=file_path, file_name=FILE_EXTENSION_TXT)
     for txt_file in txt_file_list:
-        global_logger.debug(f"found txt file: {txt_file}")
+        py_logger.debug(f"found txt file: {txt_file}")
         txt_file_path = mio.get_filepath_from_pathall(txt_file)
         txt_file_name = mio.get_filename_from_pathall(txt_file)
         md_file_name = txt_file_name.replace(FILE_EXTENSION_TXT, FILE_EXTENSION_MD)
@@ -43,9 +47,9 @@ def __txt_to_md(file_path: str):
             to_folder_path=txt_file_path,
             to_file_name=md_file_name,
         )
-        global_logger.debug(f"to md file: {md_file_name}")
+        py_logger.debug(f"to md file: {md_file_name}")
         mio.delete_files(file_path=txt_file_path, file_name_or_format=txt_file_name)
-        global_logger.debug(f"delete txt file succeed")
+        py_logger.debug(f"delete txt file succeed")
 
 
 def __generate_summary_and_readme(root_dir, current_dir, indent):
@@ -64,7 +68,7 @@ def __generate_summary_and_readme(root_dir, current_dir, indent):
     # 遍历文件夹内的所有文件和子文件夹
     for item in os.listdir(current_dir):
         item_path = mio.join_file_path(current_dir, item)
-        global_logger.debug(f"item: {item}")
+        py_logger.debug(f"item: {item}")
         # 如果是文件夹, 并且不为存放imgs和files的文件夹, 则递归生成子目录结构
         if (
             "imgs" not in item_path
@@ -77,19 +81,19 @@ def __generate_summary_and_readme(root_dir, current_dir, indent):
                 read_me_file_list = mio.find_files_nc(current_dir, FILE_README)
                 read_me_file = ""
                 if not read_me_file_list:
-                    global_logger.warning(f"找不到{FILE_README}")
+                    py_logger.warning(f"找不到{FILE_README}")
                     __create_empty_readme(current_dir)
                     read_me_file = mio.join_file_path(current_dir, FILE_README)
                 elif len(read_me_file_list) != 1:
-                    global_logger.error(f"找到多个{FILE_README}")
+                    py_logger.error(f"找到多个{FILE_README}")
                 else:
-                    global_logger.debug(f"找到了一个{FILE_README}")
+                    py_logger.debug(f"找到了一个{FILE_README}")
                     read_me_file = read_me_file_list[0]
                 # README.md 应作为枝干节点, 名称的首字母转为大写
                 structure_name = item.capitalize()
                 structure_path = __split_path_after_keyword(read_me_file, root_dir)
                 line = f"{indent}* [{structure_name}]({structure_path})\n"
-                global_logger.debug(f"add line: {line}")
+                py_logger.debug(f"add line: {line}")
                 summary_structure += line
                 # 继续递归查找
                 summary_structure += __generate_summary_and_readme(
@@ -102,7 +106,7 @@ def __generate_summary_and_readme(root_dir, current_dir, indent):
                     mio.join_file_path(current_dir, item), root_dir
                 )
                 line = f"{indent}* [{structure_name}]({structure_path})\n"
-                global_logger.debug(f"add line: {line}")
+                py_logger.debug(f"add line: {line}")
                 summary_structure += line
     return summary_structure
 
@@ -115,9 +119,9 @@ def __append_other_files_to_md(root_dir):
             readme_folder, [FILE_EXTENSION_MD, FILE_EXTENSION_JSON]
         )
         if not found_others_file_list:
-            global_logger.debug("没有找到其他格式的文件，不需要重写README.md")
+            py_logger.debug("没有找到其他格式的文件，不需要重写README.md")
         else:
-            global_logger.debug("重写README.md...")
+            py_logger.debug("重写README.md...")
             readme_data = ""
             for found_others_file in found_others_file_list:
                 structure_name = mio.get_basename(found_others_file)
@@ -128,14 +132,16 @@ def __append_other_files_to_md(root_dir):
             )
 
 
-def workflow_generate_structured_md(dir):
+def workflow_generate_structured_md(workflow_logger: Logger, dir):
+    # Set Up Logger
+    global py_logger
+    py_logger = workflow_logger
     __txt_to_md(dir)
     summary_data = __generate_summary_and_readme(dir, dir, INDENT)
-    global_logger.info(summary_data)
     mio.write_data_to_file(mio.join_file_path(dir, FILE_SUMMARY), summary_data)
     __append_other_files_to_md(dir)
 
 
 if __name__ == "__main__":
-    workflow_generate_structured_md(".")
-    input("任意键退出")
+    workflow_generate_structured_md(mlogger.global_logger, ".")
+    input("Press Any Button to Exit...")

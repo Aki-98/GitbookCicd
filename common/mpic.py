@@ -1,5 +1,4 @@
 from PIL import Image
-from mlogger import global_logger
 
 
 def compress_jpg(input_image_path, output_image_path, quality):

@@ -1,8 +1,6 @@
 from mstr import ENCODE
 
 import logging
-import os
-import sys
 from colorama import init, Fore, Style
 
 from mtime import get_current_timestamp, convert_to_time
@@ -27,25 +25,36 @@ class GlobalLogger(logging.Logger):
         print(Fore.LIGHTRED_EX + str(msg) + Style.RESET_ALL)
 
 
-def setup_logger():
+def setup_logger(
+    file_logger: bool,
+    file_logger_level: int,
+    console_logger: bool,
+    console_logger_level: int,
+):
     # init colorama
     init()
     logger = GlobalLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.NOTSET)
+    # Set Up Formatter
     formatter = logging.Formatter(
         "%(asctime)s - %(funcName)s - %(levelname)s - %(message)s"
     )
-    current_timestamp = get_current_timestamp()
-    logger_file_path_all = f"{convert_to_time(current_timestamp)}.log"
-    file_handler = logging.FileHandler(logger_file_path_all, encoding=ENCODE)
-    file_handler.setLevel(logging.DEBUG)
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-    console_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
+    if file_logger:
+        # Set Up log file name
+        current_timestamp = get_current_timestamp()
+        logger_file_path_all = f"{convert_to_time(current_timestamp)}.log"
+        file_handler = logging.FileHandler(logger_file_path_all, encoding=ENCODE)
+        file_handler.setLevel(file_logger_level)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    if console_logger:
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(console_logger_level)
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
     return logger
 
 
-global_logger = setup_logger()
+global_logger = setup_logger(True, logging.DEBUG, True, logging.DEBUG)
+
+console_logger = setup_logger(False, logging.DEBUG, True, logging.DEBUG)
