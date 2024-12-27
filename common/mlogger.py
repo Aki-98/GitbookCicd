@@ -12,18 +12,22 @@ class ErrorInLogger(Exception):
         self.message = message
 
 
-# warn() 方法： 在早期版本的 Python 中，warn() 方法用于记录警告级别的日志消息。然而，自从 Python 2.6 版本开始，warn() 方法已经被废弃，并建议使用 warning() 方法代替。尽管 warn() 方法在大多数情况下仍然可用，但它在未来的 Python 版本中可能会被移除。
-# warning() 方法： warning() 方法用于记录警告级别的日志消息，它是 logger 模块的一个方法。与 warn() 方法相比，warning() 方法更加标准化和推荐，因此在编写新代码时应该优先选择使用 warning() 方法来记录警告级别的日志消息。
-
-
 class GlobalLogger(logging.Logger):
     def error(self, msg, *args, **kwargs):
-        super().error(msg, *args, **kwargs)
-        print(Fore.RED + str(msg) + Style.RESET_ALL)
+        colored_msg = Fore.RED + str(msg) + Style.RESET_ALL
+        super().error(colored_msg, *args, **kwargs)
 
     def warning(self, msg, *args, **kwargs):
-        super().warning(msg, *args, **kwargs)
-        print(Fore.LIGHTRED_EX + str(msg) + Style.RESET_ALL)
+        colored_msg = Fore.LIGHTRED_EX + str(msg) + Style.RESET_ALL
+        super().warning(colored_msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        colored_msg = Fore.BLUE + str(msg) + Style.RESET_ALL
+        super().warning(colored_msg, *args, **kwargs)
+
+    def debug(self, msg, *args, **kwargs):
+        colored_msg = Fore.LIGHTGREEN_EX + str(msg) + Style.RESET_ALL
+        super().warning(colored_msg, *args, **kwargs)
 
 
 def __setup_logger(
@@ -43,7 +47,8 @@ def __setup_logger(
     # formatter = logging.Formatter(
     #     "%(asctime)s - %(funcName)s - %(levelname)s - %(message)s"
     # )
-    formatter = logging.Formatter("%(funcName)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter("%(message)s")
+
     if file_logger:
         # Set Up log file name
         current_timestamp = get_current_timestamp()

@@ -1,4 +1,3 @@
-from common.mlogger import global_logger
 import subprocess
 
 
@@ -12,6 +11,8 @@ def get_git_status_files(repo_path: str):
     Returns:
         set: A set of unique folder paths containing the modified, untracked, or staged files.
     """
+    from common.mlogger import global_logger
+
     try:
         # Run 'git status --porcelain' to get concise status output
         result = subprocess.run(

@@ -423,15 +423,10 @@ def get_filename_from_pathall(file_path_all: str) -> str:
     """
     Extract the file name from a full file path.
 
-    :param global_logger: global_logger instance for logging.
     :param file_path_all: The full file path.
     :return: The file name extracted from the path.
     """
-    from common.mlogger import global_logger
-
-    global_logger.debug(f"Extracting file name from full path: {file_path_all}")
     filename = os.path.basename(file_path_all)
-    global_logger.debug(f"Extracted file name: {filename}")
     return filename
 
 
@@ -439,15 +434,10 @@ def resolve_relative_path(path: str) -> str:
     """
     Resolve a relative path containing `..` components to an absolute path.
 
-    :param global_logger: global_logger instance for logging.
     :param path: The input path containing `..` components.
     :return: The resolved absolute path.
     """
-    from common.mlogger import global_logger
-
-    global_logger.debug(f"Resolving relative path: {path}")
     resolved_path = os.path.normpath(path)
-    global_logger.debug(f"Resolved path: {resolved_path}")
     return resolved_path
 
 
@@ -455,17 +445,12 @@ def get_filepath_from_pathall(file_path_all: str) -> str:
     """
     Extract the directory path from a full file path.
 
-    :param global_logger: global_logger instance for logging.
     :param file_path_all: The full file path.
     :return: The directory path extracted from the full path.
     """
-    from common.mlogger import global_logger
-
-    global_logger.debug(f"Extracting directory path from full path: {file_path_all}")
     drive, path_without_drive = os.path.splitdrive(file_path_all)
     directory_path = os.path.dirname(path_without_drive)
     full_path = os.path.join(drive, directory_path)
-    global_logger.debug(f"Extracted directory path: {full_path}")
     return full_path
 
 
@@ -473,19 +458,14 @@ def join_file_path(*args: str) -> str:
     """
     Join multiple path components into a single file path.
 
-    :param global_logger: global_logger instance for logging.
     :param args: Path components to join.
     :return: The joined file path.
     """
-    from common.mlogger import global_logger
-
-    global_logger.debug(f"Joining path components: {args}")
     if args[0] == "":
         joined_path = os.path.join(*args[1:])
     else:
         joined_path = os.path.join(*args)
     normalized_path = joined_path.replace("/", "\\")
-    global_logger.debug(f"Joined and normalized path: {normalized_path}")
     return normalized_path
 
 
@@ -493,15 +473,10 @@ def get_basename(file_path: str) -> str:
     """
     Extract the base name (file name without extension) from a file path.
 
-    :param global_logger: global_logger instance for logging.
     :param file_path: The full file path.
     :return: The base name of the file.
     """
-    from common.mlogger import global_logger
-
-    global_logger.debug(f"Extracting base name from file path: {file_path}")
     basename, _ = os.path.splitext(os.path.basename(file_path))
-    global_logger.debug(f"Extracted base name: {basename}")
     return basename
 
 
@@ -509,15 +484,10 @@ def get_extension(file_path: str) -> str:
     """
     Extract the file extension from a file path.
 
-    :param global_logger: global_logger instance for logging.
     :param file_path: The full file path.
     :return: The file extension.
     """
-    from common.mlogger import global_logger
-
-    global_logger.debug(f"Extracting file extension from file path: {file_path}")
     _, extension = os.path.splitext(file_path)
-    global_logger.debug(f"Extracted extension: {extension}")
     return extension
 
 
@@ -525,28 +495,16 @@ def rollback_path(path: str, levels: int) -> str:
     """
     Roll back a specified path by a given number of levels.
 
-    :param global_logger: global_logger instance for logging.
     :param path: The original file or directory path.
     :param levels: Number of levels to roll back (default is 2).
     :return: The rolled-back path.
     """
-    from common.mlogger import global_logger
 
-    global_logger.debug(f"Rolling back path: {path} by {levels} levels")
     if levels < 0:
-        global_logger.error("Levels must be a non-negative integer.")
         raise ValueError("Levels must be a non-negative integer.")
-    original_path = path
     for _ in range(levels):
         path = os.path.dirname(path)
-    global_logger.debug(f"Rolled back path from {original_path} to {path}")
     return path
-
-
-def create_folder_of_file_if_not_exist(file_path_all: str):
-    parent_folder = os.path.dirname(file_path_all)
-    if not parent_folder:
-        os.makedirs(parent_folder)
 
 
 # ----------------------------- File Size -----------------------------

@@ -32,11 +32,11 @@ Notice:
 
 
 def __prebook_all(
-    log_to_file: bool,
     reorganize_imgs: bool,
     download_imgs: bool,
     rename_imgs: bool,
     optimize_imgs: bool,
+    log_to_file: bool,
 ):
     if log_to_file:
         mlogger.setup_console_file_logger()
@@ -45,18 +45,22 @@ def __prebook_all(
     from common.mlogger import global_logger
 
     global_logger.info("Executing for all files...")
-    global_logger.debug(f"Options:")
-    global_logger.debug(f"  Log to File: {log_to_file}")
-    global_logger.debug(f"  Reorganize Images: {reorganize_imgs}")
-    global_logger.debug(f"  Download Images: {download_imgs}")
-    global_logger.debug(f"  Rename Images: {rename_imgs}")
-    global_logger.debug(f"  Optimize Images: {optimize_imgs}")
+    global_logger.info(f"Options:")
+    global_logger.info(f"  Reorganize Images: {reorganize_imgs}")
+    global_logger.info(f"  Download Images: {download_imgs}")
+    global_logger.info(f"  Rename Images: {rename_imgs}")
+    global_logger.info(f"  Optimize Images: {optimize_imgs}")
+    global_logger.info(f"  Log to File: {log_to_file}")
     # gitbook_path = mio.join_file_path("E:\.personal\CSGitbook")
     gitbook_path = "E:\.personal\\temp"
     global_logger.debug(f"Gitbook Path:" + gitbook_path)
     # 修改md中的图片引用格式, 移动图片位置, 下载md图片
-    if reorganize_imgs:
-        reformat_imgs_in_md.workflow_reformat_imgs_in_md(gitbook_path, download_imgs)
+    reformat_imgs_in_md.workflow_reformat_imgs_in_md(
+        gitbook_path,
+        reorganize_imgs,
+        download_imgs,
+        rename_imgs,
+    )
     # 压缩图片, 可选
     if optimize_imgs:
         compress_img.workflow_compress_imgs(gitbook_path)
@@ -68,11 +72,11 @@ def __prebook_all(
 
 
 def __prebook_diff(
-    log_to_file: bool,
     reorganize_imgs: bool,
     download_imgs: bool,
     rename_imgs: bool,
     optimize_imgs: bool,
+    log_to_file: bool,
 ):
     if log_to_file:
         mlogger.setup_console_file_logger()
@@ -81,12 +85,12 @@ def __prebook_diff(
     from common.mlogger import global_logger
 
     global_logger.info("Executing for files different from last commit...")
-    global_logger.debug(f"Options:")
-    global_logger.debug(f"  Log to File: {log_to_file}")
-    global_logger.debug(f"  Reorganize Images: {reorganize_imgs}")
-    global_logger.debug(f"  Download Images: {download_imgs}")
-    global_logger.debug(f"  Rename Images: {rename_imgs}")
-    global_logger.debug(f"  Optimize Images: {optimize_imgs}")
+    global_logger.info(f"Options:")
+    global_logger.info(f"  Log to File: {log_to_file}")
+    global_logger.info(f"  Reorganize Images: {reorganize_imgs}")
+    global_logger.info(f"  Download Images: {download_imgs}")
+    global_logger.info(f"  Rename Images: {rename_imgs}")
+    global_logger.info(f"  Optimize Images: {optimize_imgs}")
     gitbook_path = os.getcwd()
     global_logger.debug(f"Gitbook Path:" + gitbook_path)
     git_status_file_list = mgit.get_git_status_files(gitbook_path)
@@ -98,7 +102,10 @@ def __prebook_diff(
         # 修改md中的图片引用格式, 移动图片位置, 下载md图片
         if reorganize_imgs:
             reformat_imgs_in_md.workflow_reformat_imgs_in_md(
-                changed_folder, download_imgs
+                gitbook_path,
+                reorganize_imgs,
+                download_imgs,
+                rename_imgs,
             )
         # 压缩图片, 可选
         if optimize_imgs:

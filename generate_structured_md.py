@@ -135,7 +135,7 @@ def workflow_generate_structured_md(dir):
     global global_logger
     from common.mlogger import global_logger
 
-    global_logger.debug("start")
+    global_logger.info("\nStart for generate structured md...")
     __txt_to_md(dir)
     summary_data = __generate_summary_and_readme(dir, dir, INDENT)
     mio.write_data_to_file(

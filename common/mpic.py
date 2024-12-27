@@ -1,8 +1,9 @@
-from common.mlogger import global_logger
 from PIL import Image
 
 
 def compress_jpg(input_image_path, output_image_path, quality):
+    from common.mlogger import global_logger
+
     try:
         with Image.open(input_image_path) as img:
             # Remove all metadata
@@ -23,6 +24,8 @@ def compress_jpg(input_image_path, output_image_path, quality):
 
 
 def compress_png(input_image_path, output_image_path):
+    from common.mlogger import global_logger
+
     try:
         with Image.open(input_image_path) as img:
             # Convert to palette mode and enable optimization
