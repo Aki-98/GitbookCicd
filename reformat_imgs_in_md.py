@@ -3,11 +3,11 @@ import re
 
 from common import mio
 from common import mnet
+
 from common import mstr
-from common import mlogger
 
 IMG_FORMAT = r"!\[.*?\]\((.*?)\)"
-ROOT_DIR = mio.get_basename(mlogger.get_cwd())
+GITBOOK_REPO_NAME: str = ""
 
 
 def __find_image_references_in_md(md_data):
@@ -21,7 +21,7 @@ def __is_drive_on_path(file_path: str) -> bool:
 
 
 def __is_root_on_path(file_path: str) -> bool:
-    if ROOT_DIR in file_path:
+    if GITBOOK_REPO_NAME in file_path:
         return True
 
 
@@ -55,7 +55,6 @@ def __reformat_img(
         img_ref, os.path.join(target_folder_rel, target_file_name)
     )
     mio.write_data_to_file(file_all_path=md_file_path_all, data=md_data)
-    minput.exit_or_continue()
     return True
 
 
@@ -222,12 +221,15 @@ def __reformat_imgs_in_md(md_file_path_all, download_imgs: bool):
                 global_logger.error(f"未找到图片!")
 
 
-def workflow_reformat_imgs_in_md(file_path, download_imgs=True):
-    global_logger.debug(
-        "-----------------------workflow_reformat_imgs_in_md-----------------------"
-    )
+def workflow_reformat_imgs_in_md(booklib_path: str, download_imgs: bool = True):
+    global global_logger
+    from common.mlogger import global_logger
+
+    global_logger.debug("start")
+    global GITBOOK_REPO_NAME
+    GITBOOK_REPO_NAME = mio.get_basename(booklib_path)
     # 找到所有的md文件
-    md_file_list = mio.find_files(file_path=file_path, file_name=".md")
+    md_file_list = mio.find_files(file_path=booklib_path, file_name=".md")
     for md_file_path_all in md_file_list:
         md_file_base_name = mio.get_basename(md_file_path_all)
         if md_file_base_name not in ["README.md", "SUMMARY.md"]:
@@ -235,5 +237,8 @@ def workflow_reformat_imgs_in_md(file_path, download_imgs=True):
 
 
 if __name__ == "__main__":
+    import common.mlogger
+
+    common.mlogger.setup_console_file_logger()
     workflow_reformat_imgs_in_md(".")
     input("任意键退出")

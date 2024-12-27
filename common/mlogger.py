@@ -1,4 +1,5 @@
 from mstr import ENCODE
+from logging import Logger
 
 import logging
 from colorama import init, Fore, Style
@@ -25,7 +26,7 @@ class GlobalLogger(logging.Logger):
         print(Fore.LIGHTRED_EX + str(msg) + Style.RESET_ALL)
 
 
-def setup_logger(
+def __setup_logger(
     file_logger: bool,
     file_logger_level: int,
     console_logger: bool,
@@ -34,11 +35,15 @@ def setup_logger(
     # init colorama
     init()
     logger = GlobalLogger(__name__)
+    # 清除现有的 handler，避免重复添加
+    if logger.hasHandlers():
+        logger.handlers.clear()
     logger.setLevel(logging.NOTSET)
     # Set Up Formatter
-    formatter = logging.Formatter(
-        "%(asctime)s - %(funcName)s - %(levelname)s - %(message)s"
-    )
+    # formatter = logging.Formatter(
+    #     "%(asctime)s - %(funcName)s - %(levelname)s - %(message)s"
+    # )
+    formatter = logging.Formatter("%(funcName)s - %(levelname)s - %(message)s")
     if file_logger:
         # Set Up log file name
         current_timestamp = get_current_timestamp()
@@ -55,6 +60,14 @@ def setup_logger(
     return logger
 
 
-global_logger = setup_logger(True, logging.DEBUG, True, logging.DEBUG)
+global_logger: Logger = None
 
-console_logger = setup_logger(False, logging.DEBUG, True, logging.DEBUG)
+
+def setup_console_file_logger():
+    global global_logger
+    global_logger = __setup_logger(True, logging.DEBUG, True, logging.DEBUG)
+
+
+def setup_console_logger():
+    global global_logger
+    global_logger = __setup_logger(False, logging.DEBUG, True, logging.DEBUG)

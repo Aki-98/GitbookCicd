@@ -1,6 +1,8 @@
+from common.mlogger import global_logger
+
 import requests
 
-import mio
+from common import mio
 
 
 def download_image(url, file_path_all):
@@ -9,6 +11,7 @@ def download_image(url, file_path_all):
     :param url
     :param save_path
     """
+    global_logger.debug(f"[download_image] Start download img from: {url}")
     try:
         response = requests.get(url, stream=True)
         response.raise_for_status()

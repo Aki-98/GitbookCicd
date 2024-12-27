@@ -1,8 +1,8 @@
-from logging import Logger
+from common.mlogger import global_logger
 import subprocess
 
 
-def get_git_status_files(logger: Logger, repo_path: str):
+def get_git_status_files(repo_path: str):
     """
     Get the list of unique folders containing files listed in `git status`.
 
@@ -23,7 +23,7 @@ def get_git_status_files(logger: Logger, repo_path: str):
         )
 
         if result.returncode != 0:
-            raise logger.error(f"Git command failed: {result.stderr.strip()}")
+            raise global_logger.error(f"Git command failed: {result.stderr.strip()}")
 
         # Parse the output to extract file paths
         file_paths = []
@@ -35,5 +35,5 @@ def get_git_status_files(logger: Logger, repo_path: str):
         return file_paths
 
     except Exception as e:
-        logger.error(f"Error: {e}")
+        global_logger.error(f"Error: {e}")
         return []

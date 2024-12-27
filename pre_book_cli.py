@@ -39,32 +39,32 @@ def __prebook_all(
     optimize_imgs: bool,
 ):
     if log_to_file:
-        cli_logger = mlogger.global_logger
+        mlogger.setup_console_file_logger()
     else:
-        cli_logger = mlogger.console_logger
-    cli_logger.info("Executing for all files...")
-    cli_logger.debug(f"Options:")
-    cli_logger.debug(f"  Log to File: {log_to_file}")
-    cli_logger.debug(f"  Reorganize Images: {reorganize_imgs}")
-    cli_logger.debug(f"  Download Images: {download_imgs}")
-    cli_logger.debug(f"  Rename Images: {rename_imgs}")
-    cli_logger.debug(f"  Optimize Images: {optimize_imgs}")
+        mlogger.setup_console_logger()
+    from common.mlogger import global_logger
+
+    global_logger.info("Executing for all files...")
+    global_logger.debug(f"Options:")
+    global_logger.debug(f"  Log to File: {log_to_file}")
+    global_logger.debug(f"  Reorganize Images: {reorganize_imgs}")
+    global_logger.debug(f"  Download Images: {download_imgs}")
+    global_logger.debug(f"  Rename Images: {rename_imgs}")
+    global_logger.debug(f"  Optimize Images: {optimize_imgs}")
     # gitbook_path = mio.join_file_path("E:\.personal\CSGitbook")
     gitbook_path = "E:\.personal\\temp"
-    cli_logger.debug(f"Gitbook Path:" + gitbook_path)
+    global_logger.debug(f"Gitbook Path:" + gitbook_path)
     # 修改md中的图片引用格式, 移动图片位置, 下载md图片
     if reorganize_imgs:
-        reformat_imgs_in_md.workflow_reformat_imgs_in_md(
-            cli_logger, gitbook_path, download_imgs
-        )
+        reformat_imgs_in_md.workflow_reformat_imgs_in_md(gitbook_path, download_imgs)
     # 压缩图片, 可选
     if optimize_imgs:
-        compress_img.workflow_compress_imgs(cli_logger, gitbook_path)
+        compress_img.workflow_compress_imgs(gitbook_path)
     # 生成SUMMARY.md和README.md
-    generate_structured_md.workflow_generate_structured_md(cli_logger, gitbook_path)
+    generate_structured_md.workflow_generate_structured_md(gitbook_path)
     # 清除空文件夹
-    mio.remove_empty_folders(cli_logger, gitbook_path)
-    cli_logger.info("Execution successfully")
+    mio.remove_empty_folders(gitbook_path)
+    global_logger.info("Execution successfully")
 
 
 def __prebook_diff(
@@ -75,19 +75,21 @@ def __prebook_diff(
     optimize_imgs: bool,
 ):
     if log_to_file:
-        cli_logger = mlogger.global_logger
+        mlogger.setup_console_file_logger()
     else:
-        cli_logger = mlogger.console_logger
-    cli_logger.info("Executing for files different from last commit...")
-    cli_logger.debug(f"Options:")
-    cli_logger.debug(f"  Log to File: {log_to_file}")
-    cli_logger.debug(f"  Reorganize Images: {reorganize_imgs}")
-    cli_logger.debug(f"  Download Images: {download_imgs}")
-    cli_logger.debug(f"  Rename Images: {rename_imgs}")
-    cli_logger.debug(f"  Optimize Images: {optimize_imgs}")
+        mlogger.setup_console_logger()
+    from common.mlogger import global_logger
+
+    global_logger.info("Executing for files different from last commit...")
+    global_logger.debug(f"Options:")
+    global_logger.debug(f"  Log to File: {log_to_file}")
+    global_logger.debug(f"  Reorganize Images: {reorganize_imgs}")
+    global_logger.debug(f"  Download Images: {download_imgs}")
+    global_logger.debug(f"  Rename Images: {rename_imgs}")
+    global_logger.debug(f"  Optimize Images: {optimize_imgs}")
     gitbook_path = os.getcwd()
-    cli_logger.debug(f"Gitbook Path:" + gitbook_path)
-    git_status_file_list = mgit.get_git_status_files(cli_logger, gitbook_path)
+    global_logger.debug(f"Gitbook Path:" + gitbook_path)
+    git_status_file_list = mgit.get_git_status_files(gitbook_path)
     # {}会创建一个set
     changed_folder_list = {
         mio.get_filepath_from_pathall(file_path) for file_path in git_status_file_list
@@ -96,16 +98,37 @@ def __prebook_diff(
         # 修改md中的图片引用格式, 移动图片位置, 下载md图片
         if reorganize_imgs:
             reformat_imgs_in_md.workflow_reformat_imgs_in_md(
-                cli_logger, changed_folder, download_imgs
+                changed_folder, download_imgs
             )
         # 压缩图片, 可选
         if optimize_imgs:
-            compress_img.workflow_compress_imgs(cli_logger, changed_folder)
+            compress_img.workflow_compress_imgs(changed_folder)
     # 生成SUMMARY.md和README.md
-    generate_structured_md.workflow_generate_structured_md(cli_logger, gitbook_path)
+    generate_structured_md.workflow_generate_structured_md(gitbook_path)
     # 清除空文件夹
-    mio.remove_empty_folders(cli_logger, gitbook_path)
-    cli_logger.info("Execution successfully")
+    mio.remove_empty_folders(gitbook_path)
+    global_logger.info("Execution successfully")
+
+
+def __add_argument_to_subparser(subparser):
+    subparser.add_argument(
+        "-dr",
+        "--dont-reorganize-imgs",
+        action="store_false",
+        help="Reorganize local pictures",
+    )
+    subparser.add_argument(
+        "-d", "--download-imgs", action="store_true", help="Download web pictures"
+    )
+    subparser.add_argument(
+        "-dn", "--dont-rename-imgs", action="store_false", help="Download web pictures"
+    )
+    subparser.add_argument(
+        "-o", "--optimize-imgs", action="store_true", help="Compress jpgs and pngs"
+    )
+    subparser.add_argument(
+        "-l", "--log-to-file", action="store_true", help="Output log to a file"
+    )
 
 
 def main():
@@ -125,29 +148,13 @@ def main():
     # 子命令: all
     parser_all = subparsers.add_parser("all", help="Execute for all files")
 
+    __add_argument_to_subparser(parser_all)
+
     # 子命令: diff
     parser_diff = subparsers.add_parser(
         "diff", help="Execute for files differs from last commit"
     )
-
-    parser.add_argument(
-        "-dr",
-        "--dont-reorganize-imgs",
-        action="store_false",
-        help="Reorganize local pictures",
-    )
-    parser.add_argument(
-        "-d", "--download-imgs", action="store_true", help="Download web pictures"
-    )
-    parser.add_argument(
-        "-dn", "--dont-rename-imgs", action="store_false", help="Download web pictures"
-    )
-    parser.add_argument(
-        "-o", "--optimize-imgs", action="store_true", help="Compress jpgs and pngs"
-    )
-    parser.add_argument(
-        "-l", "--log-to-file", action="store_true", help="Output log to a file"
-    )
+    __add_argument_to_subparser(parser_diff)
 
     # 解析并处理命令
     args = parser.parse_args()
