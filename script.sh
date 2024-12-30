@@ -1,0 +1,1 @@
+python pre_book_cli.py all -d -c

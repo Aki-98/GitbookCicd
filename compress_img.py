@@ -1,10 +1,11 @@
-from common.mlogger import global_logger
-
 from common import mio
 from common import mpic
 
 
 def workflow_compress_imgs(file_path: str):
+    global global_logger
+    from common.mlogger import global_logger
+
     global_logger.info("\nStart for compress imgs...")
     jpeg_file_list = mio.find_files_nc(file_path=file_path, file_name=".jpeg")
     jpg_file_list = mio.find_files(file_path=file_path, file_name=".jpg")

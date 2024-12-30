@@ -233,7 +233,6 @@ def find_files_nc_without_extension(
     """
     Find files in a folder that do not belong to specified file extensions.
 
-    :param global_logger: global_logger instance for logging.
     :param folder_path: Path to the folder.
     :param without_file_extension_list: List of file extensions to exclude.
     :return: List of files that do not have the specified extensions.
@@ -250,7 +249,6 @@ def find_files_nc_without_extension(
         global_logger.error(
             f"The folder path '{folder_path}' is not a valid directory."
         )
-        raise ValueError(f"The folder path '{folder_path}' is not a valid directory.")
 
     # Convert the extensions to lowercase and validate input
     excluded_extensions = tuple(
@@ -299,19 +297,17 @@ def delete_files(file_path: str = "", file_name_or_format: str = ""):
         if file_name_or_format == "":
             global_logger.debug(f"[delete_files] Deleting all files in {file_path}")
             shutil.rmtree(file_path)
+            return
         elif file_name_or_format.startswith("."):
             global_logger.debug(
-                f"[delete_files] Deleting files with extension '{file_name_or_format}'"
+                f"[delete_files] Deleting files with extension: '{file_name_or_format}'"
             )
-            for file in find_files(
-                global_logger, file_path, file_name=file_name_or_format
-            ):
-                os.remove(file)
         else:
             global_logger.debug(
-                f"[delete_files] Deleting specific file '{file_name_or_format}'"
+                f"[delete_files] Deleting files with name: '{file_name_or_format}'"
             )
-            os.remove(join_file_path(file_path, file_name_or_format))
+        for file in find_files(file_path, file_name=file_name_or_format):
+            os.remove(file)
         global_logger.info(f"[delete_files] Deletion successful")
     except Exception as e:
         global_logger.error(f"[delete_files] Error: {e}")

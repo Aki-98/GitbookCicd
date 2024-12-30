@@ -40,15 +40,20 @@ def __reformat_img(
     md_data,
 ):
     global_logger.debug(f"__reformat_img with img_folder_abs: {img_folder_abs}")
-    # Copy the image
-    mio.copy_files(
-        from_folder_path=img_folder_abs,
-        from_file_name_or_format=img_file_name,
-        to_folder_path=target_folder_abs,
-        to_file_name=target_file_name,
-    )
-    # Delete the image
-    mio.move_to_recycle_bin(mio.join_file_path(img_folder_abs, img_file_name))
+    if img_file_name == target_file_name and img_folder_abs == target_folder_abs:
+        global_logger.debug(
+            f"img file name and folder compact with the target, no need to replace"
+        )
+    else:
+        # Copy the image
+        mio.copy_files(
+            from_folder_path=img_folder_abs,
+            from_file_name_or_format=img_file_name,
+            to_folder_path=target_folder_abs,
+            to_file_name=target_file_name,
+        )
+        # Delete the image
+        mio.move_to_recycle_bin(mio.join_file_path(img_folder_abs, img_file_name))
     # Update the image reference in the markdown file
     md_data = md_data.replace(
         img_ref, os.path.join(target_folder_rel, target_file_name)
@@ -62,31 +67,36 @@ def __reformat_imgs_in_md(md_file_path_all: str):
     md_file_name = mio.get_filename_from_pathall(md_file_path_all)
     md_folder_abs = mio.get_filepath_from_pathall(md_file_path_all)
     md_data = mio.read_data_from_file(file_all_path=md_file_path_all)
-    # Find all image links in the markdown file. To prevent modifying the same image reference multiple times, the markdown file should be updated and re-scanned after each modification.
+    # Find all image links in the markdown file.
+    # To prevent modifying the same image reference multiple times, the markdown file should be updated and re-scanned after each modification.
     img_ref_list = __find_image_references_in_md(md_data)
     for img_ref in img_ref_list:
-        global_logger.debug(f">>> Found image reference: {img_ref}")
+        global_logger.debug(f">> Found image reference: {img_ref}")
         img_file_name = mio.get_filename_from_pathall(img_ref)
         img_folder_rel = mio.get_filepath_from_pathall(img_ref)
         img_folder_abs = mio.join_file_path(md_folder_abs, img_folder_rel)
-        target_file_name = mstr.generate_random_alphanumeric() + mio.get_extension(
-            img_file_name
+        target_file_name = (
+            mstr.generate_random_alphanumeric() + mio.get_extension(img_file_name)
+            if RENAME_IMGS
+            else img_file_name
         )
-        target_folder_rel = mio.get_basename(md_file_name) + "_imgs"
+        target_folder_rel = (
+            mio.get_basename(md_file_name) + "_imgs"
+            if REORGANIZE_IMGS or DOWNLOAD_IMGS
+            else img_folder_rel
+        )
         target_folder_abs = mio.join_file_path(md_folder_abs, target_folder_rel)
-
         if DOWNLOAD_IMGS and __is_weblink_on_name(img_ref):
-            global_logger.warning(
+            global_logger.info(
                 f"1. Network image needs to be downloaded, img_link: {img_ref}"
             )
             mnet.download_image(
                 img_ref,
                 mio.join_file_path(target_folder_abs, target_file_name),
             )
-            # 这里还有问题，会报错
-            # error: [Errno 2] No such file or directory: 'E:\\.personal\\temp\\test_imgs\\bdaabc9eccc9f4ff44c84736926ea9ab.png'
-            # Error: [WinError -2147024894] 系统找不到指定的文件。: 'E:\\.personal\\temp\\test_imgs\\bdaabc9eccc9f4ff44c84736926ea9ab.png'
+            # 下载时就已经重命名并放置在响应文件夹下了
             img_folder_abs = target_folder_abs
+            img_file_name = target_file_name
             __reformat_img(
                 img_ref,
                 img_folder_abs,
@@ -100,12 +110,10 @@ def __reformat_imgs_in_md(md_file_path_all: str):
             __reformat_imgs_in_md(md_file_path_all)
             break
 
-        elif (
-            REORGANIZE_IMGS
-            and __is_drive_on_path(img_folder_rel)
-            or __is_root_on_path(img_folder_rel)
+        elif REORGANIZE_IMGS and (
+            __is_drive_on_path(img_folder_rel) or __is_root_on_path(img_folder_rel)
         ):
-            global_logger.warning(
+            global_logger.info(
                 f"2. Drive or repository name found in the image reference path."
             )
             # Check if the image exists in the specified folder
@@ -155,8 +163,10 @@ def __reformat_imgs_in_md(md_file_path_all: str):
                 else:
                     global_logger.error(f"Image not found!")
 
-        elif REORGANIZE_IMGS and target_folder_rel != img_folder_rel:
-            global_logger.warning(
+        elif REORGANIZE_IMGS and (
+            target_folder_rel != img_folder_rel
+        ):  # 没有()运算顺序也是正确的
+            global_logger.info(
                 f"3. Image not saved in the correct folder, img_folder_rel: {img_folder_rel}, target_folder_rel: {target_folder_rel}"
             )
             # Try locating the image using the reference in the markdown file
@@ -210,7 +220,7 @@ def __reformat_imgs_in_md(md_file_path_all: str):
                     global_logger.error(f"Image not found!")
 
         elif RENAME_IMGS and not mstr.is_valid_alphanumeric(img_file_name):
-            global_logger.warning(
+            global_logger.info(
                 f"4. Image name is not a valid 11-character alphanumeric string, img_file_name: {img_file_name}"
             )
             found_img_list = mio.find_files_nc(

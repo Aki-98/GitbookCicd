@@ -13,6 +13,7 @@ DESCRIPTION = """
 This script automates tasks to prepare your GitBook repository for building.
 
 What it does:
+- Change Extension of txt file to md file.
 - Generate README.md and SUMMARY.md:
   Generates README.md files for sub directories and a SUMMARY.md file in the root directory.
   (if they don't already exist).
@@ -51,22 +52,21 @@ def __prebook_all(
     global_logger.info(f"  Rename Images: {rename_imgs}")
     global_logger.info(f"  Optimize Images: {optimize_imgs}")
     global_logger.info(f"  Log to File: {log_to_file}")
-    # gitbook_path = mio.join_file_path("E:\.personal\CSGitbook")
-    gitbook_path = "E:\.personal\\temp"
+    gitbook_path = os.getcwd()
     global_logger.debug(f"Gitbook Path:" + gitbook_path)
-    # 修改md中的图片引用格式, 移动图片位置, 下载md图片
+    # Modify image references in Markdown files, move image locations, download images from Markdown
     reformat_imgs_in_md.workflow_reformat_imgs_in_md(
         gitbook_path,
         reorganize_imgs,
         download_imgs,
         rename_imgs,
     )
-    # 压缩图片, 可选
+    # Compress images (optional)
     if optimize_imgs:
         compress_img.workflow_compress_imgs(gitbook_path)
-    # 生成SUMMARY.md和README.md
+    # Generate SUMMARY.md and README.md
     generate_structured_md.workflow_generate_structured_md(gitbook_path)
-    # 清除空文件夹
+    # Remove empty folders
     mio.remove_empty_folders(gitbook_path)
     global_logger.info("Execution successfully")
 
@@ -94,12 +94,12 @@ def __prebook_diff(
     gitbook_path = os.getcwd()
     global_logger.debug(f"Gitbook Path:" + gitbook_path)
     git_status_file_list = mgit.get_git_status_files(gitbook_path)
-    # {}会创建一个set
+    # {} creates a set
     changed_folder_list = {
         mio.get_filepath_from_pathall(file_path) for file_path in git_status_file_list
     }
     for changed_folder in changed_folder_list:
-        # 修改md中的图片引用格式, 移动图片位置, 下载md图片
+        # Modify image references in Markdown files, move image locations, download images from Markdown
         if reorganize_imgs:
             reformat_imgs_in_md.workflow_reformat_imgs_in_md(
                 gitbook_path,
@@ -107,12 +107,12 @@ def __prebook_diff(
                 download_imgs,
                 rename_imgs,
             )
-        # 压缩图片, 可选
+        # Compress images (optional)
         if optimize_imgs:
             compress_img.workflow_compress_imgs(changed_folder)
-    # 生成SUMMARY.md和README.md
+    # Generate SUMMARY.md and README.md
     generate_structured_md.workflow_generate_structured_md(gitbook_path)
-    # 清除空文件夹
+    # Remove empty folders
     mio.remove_empty_folders(gitbook_path)
     global_logger.info("Execution successfully")
 
@@ -131,7 +131,7 @@ def __add_argument_to_subparser(subparser):
         "-dn", "--dont-rename-imgs", action="store_false", help="Download web pictures"
     )
     subparser.add_argument(
-        "-o", "--optimize-imgs", action="store_true", help="Compress jpgs and pngs"
+        "-c", "--compress-imgs", action="store_true", help="Compress jpgs and pngs"
     )
     subparser.add_argument(
         "-l", "--log-to-file", action="store_true", help="Output log to a file"
@@ -139,7 +139,7 @@ def __add_argument_to_subparser(subparser):
 
 
 def main():
-    # 主解析器
+    # Main parser
     parser = argparse.ArgumentParser(
         prog="prebook", description=("Pre-build setup for GitBook")
     )
@@ -147,40 +147,40 @@ def main():
         "--details", action="store_true", help="Show Detailed Introduction"
     )
 
-    # 创建子命令解析器
+    # Create subcommand parsers
     subparsers = parser.add_subparsers(
         dest="command", help="all available sub commands"
     )
 
-    # 子命令: all
+    # Subcommand: all
     parser_all = subparsers.add_parser("all", help="Execute for all files")
 
     __add_argument_to_subparser(parser_all)
 
-    # 子命令: diff
+    # Subcommand: diff
     parser_diff = subparsers.add_parser(
         "diff", help="Execute for files differs from last commit"
     )
     __add_argument_to_subparser(parser_diff)
 
-    # 解析并处理命令
+    # Parse and process commands
     args = parser.parse_args()
     if args.details:
         print(DESCRIPTION)
     elif args.command == "all":
         __prebook_all(
-            not args.dont_reorganize_imgs,
+            args.dont_reorganize_imgs,  # store_false negates the option; this represents reorganize_imgs
             args.download_imgs,
-            not args.dont_rename_imgs,
-            args.optimize_imgs,
+            args.dont_rename_imgs,
+            args.compress_imgs,
             args.log_to_file,
         )
     elif args.command == "diff":
         __prebook_diff(
-            not args.dont_reorganize_imgs,
+            args.dont_reorganize_imgs,
             args.download_imgs,
-            not args.dont_rename_imgs,
-            args.optimize_imgs,
+            args.dont_rename_imgs,
+            args.compress_imgs,
             args.log_to_file,
         )
     else:
