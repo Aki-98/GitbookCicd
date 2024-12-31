@@ -91,25 +91,36 @@ def __prebook_diff(
     global_logger.info(f"  Download Images: {download_imgs}")
     global_logger.info(f"  Rename Images: {rename_imgs}")
     global_logger.info(f"  Optimize Images: {optimize_imgs}")
-    gitbook_path = os.getcwd()
-    global_logger.debug(f"Gitbook Path:" + gitbook_path)
+    # gitbook_path = os.getcwd()
+    gitbook_path = "E:\.personal\CSGitbook"
+    global_logger.debug(f"Gitbook Path: " + gitbook_path)
     git_status_file_list = mgit.get_git_status_files(gitbook_path)
-    # {} creates a set
-    changed_folder_list = {
+    changed_folder_set = set(
         mio.get_filepath_from_pathall(file_path) for file_path in git_status_file_list
-    }
-    for changed_folder in changed_folder_list:
-        # Modify image references in Markdown files, move image locations, download images from Markdown
-        if reorganize_imgs:
+    )
+    for changed_folder in changed_folder_set:
+        changed_folder_base = mio.get_filename_from_pathall(changed_folder)
+        if "" == changed_folder:
+            changed_folder = gitbook_path
+        global_logger.debug("Changed Folder Path: " + changed_folder)
+        if (
+            not changed_folder_base.endswith("_imgs")
+            and not changed_folder_base.endswith("_files")
+            and ".git" != changed_folder_base
+            and ".github" != changed_folder_base
+            and "node_modules" != changed_folder_base
+        ):
+            global_logger.debug(f"Changed Folder Path: " + changed_folder)
+            # Modify image references in Markdown files, move image locations, download images from Markdown
             reformat_imgs_in_md.workflow_reformat_imgs_in_md(
-                gitbook_path,
+                changed_folder,
                 reorganize_imgs,
                 download_imgs,
                 rename_imgs,
             )
-        # Compress images (optional)
-        if optimize_imgs:
-            compress_img.workflow_compress_imgs(changed_folder)
+            # Compress images (optional)
+            if optimize_imgs:
+                compress_img.workflow_compress_imgs(changed_folder)
     # Generate SUMMARY.md and README.md
     generate_structured_md.workflow_generate_structured_md(gitbook_path)
     # Remove empty folders

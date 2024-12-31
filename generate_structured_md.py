@@ -74,12 +74,13 @@ def __generate_readme_refers_summary(root_dir, current_dir, indent):
     # Iterate through all files and subfolders in the directory
     for item in os.listdir(current_dir):
         item_path = mio.join_file_path(current_dir, item)
-        global_logger.debug(f"Item: {item}")
+        # global_logger.debug(f"Item: {item}")
         # If it's a folder and not a folder containing imgs, files, .git, or node_modules, recursively generate the subdirectory structure
         if (
-            "_imgs" not in item
-            and "_files" not in item
+            not item.endswith("_imgs")
+            and not item.endswith("_files")
             and ".git" != item
+            and ".github" != item
             and "node_modules" != item
         ):
             if os.path.isdir(item_path):
@@ -136,7 +137,6 @@ def __generate_readme_refers_summary(root_dir, current_dir, indent):
                 )
                 line = f"{indent}* [{structure_name}]({structure_path})\n"
                 summary_structure += line
-                global_logger.debug(f"Added line: {line}")
     return summary_structure
 
 

@@ -1,4 +1,6 @@
 import subprocess
+import codecs
+import re
 
 
 def get_git_status_files(repo_path: str):
@@ -26,14 +28,17 @@ def get_git_status_files(repo_path: str):
         if result.returncode != 0:
             raise global_logger.error(f"Git command failed: {result.stderr.strip()}")
 
-        # Parse the output to extract file paths
-        file_paths = []
-        for line in result.stdout.splitlines():
-            # Status lines start with a two-character code (e.g., " M", "??")
-            if len(line) > 3:
-                file_path = line[3:].strip()
-                file_paths.append(file_path)
-        return file_paths
+        output = result.stdout
+        # Decode octal escape characters in the path
+        decoded_output = codecs.decode(output, "unicode_escape")
+        # Check if the path contains incorrectly decoded UTF-8 characters (e.g., é¡¹ç, etc.)
+        try:
+            decoded_output = decoded_output.encode("latin1").decode("utf-8")
+        except Exception:
+            pass
+        changed_file_pattern = r"(?:D|M|A|\?\?)\s+([^\s]+)"
+        changed_file_matches = re.findall(changed_file_pattern, decoded_output)
+        return changed_file_matches
 
     except Exception as e:
         global_logger.error(f"Error: {e}")

@@ -110,7 +110,7 @@ def find_files(file_path: str = "", file_name: str = ".apk", filter: str = "") -
                     if filter in file:
                         found_path = os.path.join(root, file)
                         found_files.append(found_path)
-                        global_logger.debug(f"[find_files] Found: {found_path}")
+                        # global_logger.debug(f"[find_files] Found: {found_path}")
             return found_files
 
         elif file_name.startswith("."):
@@ -123,7 +123,7 @@ def find_files(file_path: str = "", file_name: str = ".apk", filter: str = "") -
                     if file.endswith(file_name):
                         found_path = os.path.join(root, file)
                         found_files.append(found_path)
-                        global_logger.debug(f"[find_files] Found: {found_path}")
+                        # global_logger.debug(f"[find_files] Found: {found_path}")
             return found_files
 
         else:
@@ -134,7 +134,7 @@ def find_files(file_path: str = "", file_name: str = ".apk", filter: str = "") -
                     if file == file_name:
                         found_path = os.path.join(root, file)
                         found_files.append(found_path)
-                        global_logger.debug(f"[find_files] Found: {found_path}")
+                        # global_logger.debug(f"[find_files] Found: {found_path}")
             return found_files
     except Exception as e:
         global_logger.error(f"[find_files] Error: {e}")
