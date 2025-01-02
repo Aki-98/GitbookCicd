@@ -10,7 +10,7 @@ import reformat_imgs_in_md
 import generate_structured_md
 
 DESCRIPTION = """
-This script automates tasks to prepare your GitBook repository for building.
+This tool automates tasks to prepare your GitBook repository for building.
 
 What it does:
 - Change Extension of txt file to md file.
@@ -68,7 +68,7 @@ def __prebook_all(
     generate_structured_md.workflow_generate_structured_md(gitbook_path)
     # Remove empty folders
     mio.remove_empty_folders(gitbook_path)
-    global_logger.info("Execution successfully")
+    global_logger.info("Prebook Execution done")
 
 
 def __prebook_diff(
@@ -86,11 +86,11 @@ def __prebook_diff(
 
     global_logger.info("Executing for files different from last commit...")
     global_logger.info(f"Options:")
-    global_logger.info(f"  Log to File: {log_to_file}")
     global_logger.info(f"  Reorganize Images: {reorganize_imgs}")
     global_logger.info(f"  Download Images: {download_imgs}")
     global_logger.info(f"  Rename Images: {rename_imgs}")
     global_logger.info(f"  Optimize Images: {optimize_imgs}")
+    global_logger.info(f"  Log to File: {log_to_file}")
     # gitbook_path = os.getcwd()
     gitbook_path = "E:\.personal\CSGitbook"
     global_logger.debug(f"Gitbook Path: " + gitbook_path)
@@ -112,12 +112,13 @@ def __prebook_diff(
         ):
             global_logger.debug(f"Changed Folder Path: " + changed_folder)
             # Modify image references in Markdown files, move image locations, download images from Markdown
-            reformat_imgs_in_md.workflow_reformat_imgs_in_md(
-                changed_folder,
-                reorganize_imgs,
-                download_imgs,
-                rename_imgs,
-            )
+            if reorganize_imgs or download_imgs or rename_imgs:
+                reformat_imgs_in_md.workflow_reformat_imgs_in_md(
+                    changed_folder,
+                    reorganize_imgs,
+                    download_imgs,
+                    rename_imgs,
+                )
             # Compress images (optional)
             if optimize_imgs:
                 compress_img.workflow_compress_imgs(changed_folder)
@@ -125,21 +126,21 @@ def __prebook_diff(
     generate_structured_md.workflow_generate_structured_md(gitbook_path)
     # Remove empty folders
     mio.remove_empty_folders(gitbook_path)
-    global_logger.info("Execution successfully")
+    global_logger.info("Prebook Execution done")
 
 
 def __add_argument_to_subparser(subparser):
     subparser.add_argument(
-        "-dr",
-        "--dont-reorganize-imgs",
-        action="store_false",
+        "-o",
+        "--reorganize-imgs",
+        action="store_true",
         help="Reorganize local pictures",
     )
     subparser.add_argument(
         "-d", "--download-imgs", action="store_true", help="Download web pictures"
     )
     subparser.add_argument(
-        "-dn", "--dont-rename-imgs", action="store_false", help="Download web pictures"
+        "-n", "--rename-imgs", action="store_true", help="Download web pictures"
     )
     subparser.add_argument(
         "-c", "--compress-imgs", action="store_true", help="Compress jpgs and pngs"

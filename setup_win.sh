@@ -1,0 +1,1 @@
+pyinstaller --onefile pre_book_cli.py

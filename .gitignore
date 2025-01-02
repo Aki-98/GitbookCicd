@@ -1,6 +1,10 @@
 /.vscode
 common/__pycache__/
 /__pycache__/
+/build/
+/dist/
+
 
 *.log
 
+*.spec
